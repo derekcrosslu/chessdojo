@@ -175,7 +175,7 @@ const ChessDojo: React.FC = () => {
 
 
   return (
-    <div className="flex flex-col items-center p-4 w-1/2">
+    <div className="flex flex-col items-center p-4 w-1/2 mb-4">
       <h1 className="text-2xl font-bold mb-4">Chess Dojo</h1>
       <div className="flex items-center mb-4">
         <span className="mr-2">Play as:</span>
@@ -189,7 +189,7 @@ const ChessDojo: React.FC = () => {
       <Select
        value={selectedOpening}
        onValueChange={(value) => setSelectedOpening(value as Opening)}
-       className="mb-4"
+
       >
         <SelectTrigger className="w-[180px]">
           <SelectValue placeholder="Select an option" />

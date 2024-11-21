@@ -3,6 +3,7 @@ import { Chessboard } from 'react-chessboard';
 import { Chess } from 'chess.js';
 import { Button } from './ui/button';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from './ui/select';
+import { cn } from '../lib/utils';
 
 type Opening = 'Italian Game' | 'French Defense' | 'Scandinavian Defense' | 
                'King\'s Indian Attack' | 'London System' | 'Caro-Kann Defense' | 
@@ -151,38 +152,46 @@ const ChessDojo: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col items-center p-4 w-1/2">
-      <h1 className="text-2xl font-bold mb-4">Chess Match</h1>
-      <p className="mb-4">Current Turn: {currentTurn === 'w' ? 'White' : 'Black'}</p>
+    <div className='flex flex-col items-center p-4 w-1/2 mb-4'>
+      <h1 className='text-2xl font-bold mb-4'>Chess Match</h1>
+      <p className='mb-4'>
+        Current Turn: {currentTurn === 'w' ? 'White' : 'Black'}
+      </p>
       <Select
-       value={selectedOpening}
-       onValueChange={(value) => setSelectedOpening(value as Opening)}
-       className="mb-4"
+        value={selectedOpening}
+        onValueChange={(value) => setSelectedOpening(value as Opening)}
+
       >
-        <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="Select an opening" />
+        <SelectTrigger className='w-[180px]'>
+          <SelectValue placeholder='Select an opening' />
         </SelectTrigger>
-        <SelectContent className="bg-white p-4 mb-4">
+        <SelectContent className='bg-white p-4 mb-4'>
           {(Object.keys(openings) as Opening[]).map((opening) => (
-            <SelectItem key={opening} value={opening}>
+            <SelectItem
+              key={opening}
+              value={opening}
+            >
               {opening}
             </SelectItem>
           ))}
         </SelectContent>
       </Select>
       {openingDescription && (
-        <p className="mb-4 text-sm italic mt-4">{openingDescription}</p>
+        <p className='mb-4 text-sm italic mt-4'>{openingDescription}</p>
       )}
-      <Chessboard position={fen} onPieceDrop={onDrop} boardOrientation={boardOrientation} />
-      <p className="mt-4">{isThinking ? "Thinking..." : suggestion?.text}</p>
-      <div className="flex space-x-4 mt-4">
-        <Button onClick={resetGame}>
-          Reset Game
-        </Button>
-        <Button onClick={switchColors}>
-          Switch Colors
-        </Button>
-        <Button onClick={makeSuggestedMove} disabled={!suggestion}>
+      <Chessboard
+        position={fen}
+        onPieceDrop={onDrop}
+        boardOrientation={boardOrientation}
+      />
+      <p className='mt-4'>{isThinking ? 'Thinking...' : suggestion?.text}</p>
+      <div className='flex space-x-4 mt-4'>
+        <Button onClick={resetGame}>Reset Game</Button>
+        <Button onClick={switchColors}>Switch Colors</Button>
+        <Button
+          onClick={makeSuggestedMove}
+          disabled={!suggestion}
+        >
           Make Suggested Move
         </Button>
       </div>

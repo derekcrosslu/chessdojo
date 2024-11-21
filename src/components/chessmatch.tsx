@@ -3,7 +3,7 @@ import { Chessboard } from 'react-chessboard';
 import { Chess } from 'chess.js';
 import { Button } from './ui/button';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from './ui/select';
-import { cn } from '../lib/utils';
+
 
 type Opening = 'Italian Game' | 'French Defense' | 'Scandinavian Defense' | 
                'King\'s Indian Attack' | 'London System' | 'Caro-Kann Defense' | 

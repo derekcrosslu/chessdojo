@@ -54,7 +54,7 @@ const ChessMultiplayer: React.FC = () => {
         setBoardStatus('Board created and ready');
       },
 
-      playerJoined: ({ color, playerId, fen, orientation }: { color: 'white' | 'black', playerId: string, fen?: string, orientation: 'white' | 'black' }) => {
+      playerJoined: ({ color, playerId, fen }: { color: 'white' | 'black', playerId: string, fen?: string }) => {
         try {
           const newGame = new Chess();
           if (fen) {
@@ -90,7 +90,7 @@ const ChessMultiplayer: React.FC = () => {
         }
       },
 
-      moveMade: ({ from, to, fen }: { from: string, to: string, fen: string }) => {
+      moveMade: ({ fen }: { fen: string }) => {
         try {
           const newGame = new Chess(fen);
           setGameState(prev => ({ ...prev, game: newGame }));

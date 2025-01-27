@@ -58,6 +58,7 @@ const ChessDojo: React.FC = () => {
   const stockfishRef = useRef<Worker | null>(null);
   const [currentTurn, setCurrentTurn] = useState<'w' | 'b'>('w');
   const [boardOrientation, setBoardOrientation] = useState<'white' | 'black'>('white');
+  const [moveHistory, setMoveHistory] = useState<Chess[]>([new Chess()]);
 
   useEffect(() => {
     stockfishRef.current = new Worker('/stockfish.js');
@@ -121,6 +122,7 @@ const ChessDojo: React.FC = () => {
       if (move === null) return false; // illegal move
       setFen(game.fen());
       setCurrentTurn(game.turn());
+      setMoveHistory(prev => [...prev, new Chess(game.fen())]);
       return true;
     } catch (e) {
       return false;
@@ -134,6 +136,17 @@ const ChessDojo: React.FC = () => {
     setSuggestion(null);
     setSelectedOpening('');
     setCurrentTurn('w');
+    setMoveHistory([new Chess()]);
+  };
+
+  const undoMove = () => {
+    if (moveHistory.length > 1) {
+      const previousPosition = moveHistory[moveHistory.length - 2];
+      setGame(previousPosition);
+      setFen(previousPosition.fen());
+      setCurrentTurn(previousPosition.turn());
+      setMoveHistory(prev => prev.slice(0, -1));
+    }
   };
 
   const switchColors = () => {
@@ -146,6 +159,7 @@ const ChessDojo: React.FC = () => {
       if (move) {
         setFen(game.fen());
         setCurrentTurn(game.turn());
+        setMoveHistory(prev => [...prev, new Chess(game.fen())]);
         setSuggestion(null); // Clear the suggestion after making the move
       }
     }
@@ -193,6 +207,12 @@ const ChessDojo: React.FC = () => {
           disabled={!suggestion}
         >
           Make Suggested Move
+        </Button>
+        <Button 
+          onClick={undoMove} 
+          disabled={moveHistory.length <= 1}
+        >
+          Undo Move
         </Button>
       </div>
     </div>

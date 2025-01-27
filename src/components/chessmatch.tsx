@@ -59,6 +59,8 @@ const ChessDojo: React.FC = () => {
   const [currentTurn, setCurrentTurn] = useState<'w' | 'b'>('w');
   const [boardOrientation, setBoardOrientation] = useState<'white' | 'black'>('white');
   const [moveHistory, setMoveHistory] = useState<Chess[]>([new Chess()]);
+  const [moveQuality, setMoveQuality] = useState<'blunder' | 'bad' | 'good' | 'excellent' | null>(null);
+  const [previousEval, setPreviousEval] = useState<number | null>(null);
 
   useEffect(() => {
     stockfishRef.current = new Worker('/stockfish.js');
@@ -89,22 +91,42 @@ const ChessDojo: React.FC = () => {
     }
   }, [game, fen]);
 
+  const getMoveQuality = (currentEval: number, previousEval: number | null): 'blunder' | 'bad' | 'good' | 'excellent' => {
+    if (!previousEval) return 'good';
+    const evalDiff = currentEval - previousEval;
+    
+    if (evalDiff < -2) return 'blunder';
+    if (evalDiff < -1) return 'bad';
+    if (evalDiff > 1) return 'excellent';
+    return 'good';
+  };
+
   const getSuggestion = (currentGame: Chess) => {
     setIsThinking(true);
-    const depth = 10; // Adjust for suggestion quality
+    const depth = 10;
     stockfishRef.current?.postMessage(`position fen ${currentGame.fen()}`);
     stockfishRef.current?.postMessage(`go depth ${depth}`);
 
     const handleMessage = (event: MessageEvent) => {
       const message = event.data;
-      if (typeof message === 'string' && message.startsWith('bestmove')) {
-        const move = message.split(' ')[1];
-        setSuggestion({
-          text: `Suggested move for ${currentGame.turn() === 'w' ? 'White' : 'Black'}: ${move}`,
-          move: move
-        });
-        setIsThinking(false);
-        stockfishRef.current?.removeEventListener('message', handleMessage);
+      if (typeof message === 'string') {
+        if (message.startsWith('info') && message.includes('score cp')) {
+          const evalMatch = message.match(/score cp (-?\d+)/);
+          if (evalMatch) {
+            const currentEval = parseInt(evalMatch[1]) / 100;
+            const quality = getMoveQuality(currentEval, previousEval);
+            setMoveQuality(quality);
+            setPreviousEval(currentEval);
+          }
+        } else if (message.startsWith('bestmove')) {
+          const move = message.split(' ')[1];
+          setSuggestion({
+            text: `Suggested move for ${currentGame.turn() === 'w' ? 'White' : 'Black'}: ${move}`,
+            move: move
+          });
+          setIsThinking(false);
+          stockfishRef.current?.removeEventListener('message', handleMessage);
+        }
       }
     };
 
@@ -137,6 +159,8 @@ const ChessDojo: React.FC = () => {
     setSelectedOpening('');
     setCurrentTurn('w');
     setMoveHistory([new Chess()]);
+    setMoveQuality(null);
+    setPreviousEval(null);
   };
 
   const undoMove = () => {
@@ -214,6 +238,16 @@ const ChessDojo: React.FC = () => {
         >
           Undo Move
         </Button>
+      </div>
+      <div className='flex items-center space-x-4 mb-4'>
+        <p>Move Quality:</p>
+        <div
+          className={`w-6 h-6 rounded ${moveQuality === 'blunder' ? 'bg-red-500' :
+            moveQuality === 'bad' ? 'bg-yellow-500' :
+            moveQuality === 'good' ? 'bg-green-500' :
+            moveQuality === 'excellent' ? 'bg-blue-500' :
+            'bg-gray-200'}`}
+        />
       </div>
     </div>
   );
